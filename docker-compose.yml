@@ -5,11 +5,37 @@ networks:
     external: true
 
 services:
-  the_node_app:
+
+  app:
+    # Run based on local Dockerfile
+    # When ready to start a CICD for this project, 
+    # push the built file to GHCR from laptop.
+    # then change this to reference that built package and pull
+    # it instead.  I just set this up as a locally built docker package
+    # because I am currently too lazy to setup CICD for this right now.
+    # but I will soon.
+    build: .
     networks:
       - nginx-certbot-proj_docker_nginx_network
-    image: ghcr.io/pmeaney/express_scaffold_dockerized
-    restart: unless-stopped
+    depends_on:
+      # Our app does not work without our database
+      # so this ensures our database is loaded first
+      - postgres
     ports:
       - "3000:3000"
-    command: "npm run start"
+    volumes:
+      # Maps our current project directory `.` to
+      # our working directory in the container
+      - ./:/usr/src/app/
+      # node_modules workaround for volumes
+      # https://stackoverflow.com/a/32785014
+      - /usr/src/app/node_modules
+
+  # app:
+  #   networks:
+  #     - nginx-certbot-proj_docker_nginx_network
+  #   image: ghcr.io/pmeaney/express_scaffold_dockerized
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   command: "npm run start"

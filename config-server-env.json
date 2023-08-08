@@ -1,9 +1,9 @@
 {
   "env": {
     "NODE_ENV": "development",
-    "APP_API_BASE_URL": "localhost:8080",
+    "APP_API_BASE_URL": "localhost:3000",
     "DB_CONNECTION": "postgres://localhost:5432/root@root",
-    "DEV_DOCKER_POSTGRES_CONTAINER_NAME": "restapi_express_psql_pgadmin-postgres-1",
+    "DEV_DOCKER_POSTGRES_CONTAINER_NAME": "postgres-proj-postgres-1",
     "DEV_POSTGRES_USER": "root",
     "DEV_POSTGRES_PASSWORD": "root",
     "DEV_POSTGRES_DATABASE_NAME": "root",

@@ -1,0 +1,15 @@
+version: '3'
+
+networks:
+  nginx-certbot-proj_docker_nginx_network:
+    external: true
+
+services:
+  app:
+    networks:
+      - nginx-certbot-proj_docker_nginx_network
+    image: ghcr.io/pmeaney/express_scaffold_dockerized
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    command: "npm run start"
