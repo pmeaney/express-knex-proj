@@ -17,10 +17,6 @@ services:
     build: .
     networks:
       - nginx-certbot-proj_docker_nginx_network
-    depends_on:
-      # Our app does not work without our database
-      # so this ensures our database is loaded first
-      - postgres
     ports:
       - "3000:3000"
     volumes:
