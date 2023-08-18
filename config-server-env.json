@@ -8,6 +8,8 @@
     "DEV_POSTGRES_PASSWORD": "root",
     "DEV_POSTGRES_DATABASE_NAME": "root",
     "DEV_DB_MIGRATIONS_DIR": "./db/migrations",
-    "DEV_DB_SEEDS_DIR": "./db/seeds"
+    "DEV_DB_SEEDS_DIR": "./db/seeds",
+    "DEV_GOOGLE_OAUTH_CLIENTID": "64137204712-h2iqg4f8eac90d0vj5krm707beg1atf6.apps.googleusercontent.com",
+    "DEV_GOOGLE_OAUTH_CLIENTSECRET": "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"
   }
 }

@@ -1,0 +1,30 @@
+version: '3'
+
+networks:
+  nginx-certbot-proj_docker_nginx_network:
+    external: true
+
+services:
+
+  app:
+    build: ghcr.io/pmeaney/express-knex-proj 
+    networks:
+      - nginx-certbot-proj_docker_nginx_network
+    ports:
+      - "3000:3000"
+    volumes:
+      # Maps our current project directory `.` to
+      # our working directory in the container
+      - ./:/usr/src/app/
+      # node_modules workaround for volumes
+      # https://stackoverflow.com/a/32785014
+      - /usr/src/app/node_modules
+
+  # app:
+  #   networks:
+  #     - nginx-certbot-proj_docker_nginx_network
+  #   image: ghcr.io/pmeaney/express_scaffold_dockerized
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   command: "npm run start"
