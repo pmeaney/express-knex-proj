@@ -1,4 +1,3 @@
-
 ____________
 
 Source of Docker Compose template for connecting NodeJS with Postgres (& PGAdmin):
