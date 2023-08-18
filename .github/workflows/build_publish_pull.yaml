@@ -25,38 +25,38 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GH_PAT__FOR_GHA_081823 }}
 
-  #     - name: Build container image
-  #       run: docker build -t $REGISTRY/$IMAGE_NAME:$GITHUB_SHA .
+      - name: Build container image
+        run: docker build -t $REGISTRY/$IMAGE_NAME:$GITHUB_SHA .
 
-  #     - name: Push image to Container Registry
-  #       run: docker push $REGISTRY/$IMAGE_NAME:$GITHUB_SHA
+      - name: Push image to Container Registry
+        run: docker push $REGISTRY/$IMAGE_NAME:$GITHUB_SHA
   
-  # login_and_pull:
-  #   needs: build_and_publish
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Take ssh key from github repo, copy it into the ubuntu VM, so we can access the server & download the docker image
-  #       run: |
-  #         mkdir -p ~/.ssh/
-  #         echo "$SSH_PRIV_KEY" > ~/.ssh/id_ed25519
-  #         chmod 600 ~/.ssh/id_ed25519
-  #         cat >>~/.ssh/config <<END
-  #         Host dev
-  #           HostName $DEV_SERVER_IP
-  #           User $SSH_USER
-  #           IdentityFile ~/.ssh/id_ed25519
-  #           StrictHostKeyChecking no
-  #         END
-  #       env:
-  #         SSH_USER: ${{ secrets.DEV_SSH_USER }}
-  #         SSH_PRIV_KEY: ${{ secrets.DEV_KEY_PRIVKEY_NOPASS_FOR_GHA }}
-  #         DEV_SERVER_IP: ${{ secrets.DEV_SERVER_IP }}
+  login_and_pull:
+    needs: build_and_publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Take ssh key from github repo, copy it into the ubuntu VM, so we can access the server & download the docker image
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIV_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          cat >>~/.ssh/config <<END
+          Host dev
+            HostName $DEV_SERVER_IP
+            User $SSH_USER
+            IdentityFile ~/.ssh/id_ed25519
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.DEV_SSH_USER }}
+          SSH_PRIV_KEY: ${{ secrets.DEV_KEY_PRIVKEY_NOPASS_FOR_GHA }}
+          DEV_SERVER_IP: ${{ secrets.DEV_SERVER_IP }}
 
-  #     - name: Test ssh connection
-  #       run:  ssh dev "cat /etc/os-release"
+      - name: Test ssh connection
+        run:  ssh dev "cat /etc/os-release"
 
-  #     - name: Ssh in & log into GHCR.  Then docker pull.
-  #       run: |
-  #         ssh dev "pwd"
+      - name: Ssh in & log into GHCR.  Then docker pull.
+        run: |
+          ssh dev "pwd"
   #       # ssh dev "echo ${{ secrets.GH_PAT__FOR_GHA }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin"
   #       # ssh dev "cd ~/ && docker pull $REGISTRY/$IMAGE_NAME:$GITHUB_SHA"
