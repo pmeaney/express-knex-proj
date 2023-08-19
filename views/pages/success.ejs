@@ -16,11 +16,20 @@
           <div class="row">
             <div class="col-sm-6">
                 <div class="well">
-                        <p>
+                        
+                        <% if(user.provider === 'google'){ %>
+                          <p>
                             <strong>Id</strong>: <%= user.id %><br>
                             <strong>Email</strong>: <%= user.emails[0].value %><br>
                             <strong>Name</strong>: <%= user.displayName %>
                         </p>
+                       <% } %>
+                       <% if(user.provider === 'facebook'){ %>
+                        <p>
+                          <strong>Id</strong>: <%= user.id %><br>
+                          <strong>Name</strong>: <%= user.displayName %>
+                      </p>
+                     <% } %>
                 </div>
             </div>
         </div>

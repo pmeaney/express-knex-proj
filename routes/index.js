@@ -15,8 +15,8 @@ passport.deserializeUser(function(obj, cb) {
   cb(null, obj);
 });
 const FacebookStrategy = require('passport-facebook').Strategy;
-const FACEBOOK_OAUTH_CLIENT_ID = process.env.DEV_FACEBOOK_OAUTH_CLIENTID
-const FACEBOOK_OAUTH_CLIENT_SECRET = process.env.DEV_FACEBOOK_OAUTH_CLIENTSECRET
+const FACEBOOK_OAUTH_CLIENT_ID = process.env.DEV_FACEBOOK_OAUTH_APPID
+const FACEBOOK_OAUTH_CLIENT_SECRET = process.env.DEV_FACEBOOK_OAUTH_APPSECRET
 const FACEBOOK_OAUTH_BACLLBACK_URL = process.env.DEV_FACEBOOK_OAUTH_CALLBACKURL
 
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
