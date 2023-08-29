@@ -12,6 +12,7 @@ exports.up = function(knex) {
   .createTable('users', function (table) {
     table.increments('user_id').primary()
     table.string('first_name');
+    table.string('email');
     table.integer('role').references('roles.role_id');
     table.integer('status').references('user_status.user_status_id');
     table.timestamp('created_at').defaultTo(knex.fn.now());

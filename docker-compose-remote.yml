@@ -1,3 +1,13 @@
+# This docker-compose file is for the remote server.
+# I have a CICD workflow which automatically
+# pulls the image down onto the server.
+# 
+# It runs the following process (or you can from CLI) to publish to Github Container Registry.
+# export CR_PAT=githubToken
+# echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+# docker build -t ghcr.io/USERNAME/PACKAGENAME . 
+# docker push ghcr.io/USERNAME/PACKAGENAME:latest
+
 version: '3'
 
 networks:

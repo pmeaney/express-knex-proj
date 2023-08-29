@@ -1,0 +1,11 @@
+#  https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+GET http://localhost:3000/api/v1/employees
+
+###
+POST http://localhost:3000/auth/validateEmail
+content-type: application/json
+
+{
+    "email": "blah@test.com"
+}

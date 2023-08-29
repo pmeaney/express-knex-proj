@@ -3,13 +3,16 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const session = require('express-session');
+var session = require('express-session');
+var flash = require('connect-flash');
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var authRouter = require('./routes/auth');
 
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./docs/swagger.json');
+var swaggerUi = require('swagger-ui-express');
+var swaggerDocument = require('./docs/swagger.json');
 
 
 var app = express();
@@ -24,6 +27,8 @@ app.use(session({
   secret: 'SECRET' 
 }));
 
+app.use(flash());
+
 
 var passport = require('passport');
 app.use(passport.initialize());
@@ -37,6 +42,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/v1/users', usersRouter);
+app.use('/auth', authRouter);
 
 // swagger route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -49,8 +55,8 @@ app.use(function(req, res, next) {
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.message = err.message;               // 8/29/23 -- added developmentB since we use two env configs for Knexjs-- development for Knex CLI, developmentB for the node app Knex connection
+  res.locals.error = req.app.get('env') === 'development' || 'developmentB' ? err : {};
 
   // render the error page
   res.status(err.status || 500);

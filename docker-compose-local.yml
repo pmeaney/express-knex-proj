@@ -1,7 +1,7 @@
 version: '3'
 
 networks:
-  nginx-certbot-proj_docker_nginx_network:
+  postgres-proj_postgres-proj_localdev_docker_network:
     external: true
 
 services:
@@ -16,7 +16,7 @@ services:
     # but I will soon.
     build: .
     networks:
-      - nginx-certbot-proj_docker_nginx_network
+      - postgres-proj_postgres-proj_localdev_docker_network
     ports:
       - "3000:3000"
     volumes:
