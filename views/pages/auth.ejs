@@ -11,6 +11,11 @@
 </head>
 <body>
 <div class="container">
+    <% if( flashMessages ) { %>
+        <button type="button" class="btn btn-outline-info">
+          <%= flashMessages %>
+        </button>
+        <% } %>
     <div class="jumbotron text-center text-primary">
         <h1><span class="fa fa-lock"></span> Social Authentication</h1>
         <p>Login or Register with:</p>

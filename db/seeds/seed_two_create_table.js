@@ -2,12 +2,12 @@ exports.seed = async function (knex) {
   try {
     await knex("users").insert(
       [
-        {
-        oauth_provider_user_id: '111244555435771716184',
-        oauth_provider: 'google',
-        email: 'patrick.wm.meaney@gmail.com',
-        isSeedData: true,
-      },
+      //   {
+      //   oauth_provider_user_id: '111244555435771716184',
+      //   oauth_provider: 'google',
+      //   email: 'patrick.wm.meaney@gmail.com',
+      //   isSeedData: true,
+      // },
         {
         oauth_provider_user_id: '1234',
         oauth_provider: 'google',

@@ -17,7 +17,7 @@ passport.deserializeUser(function(obj, cb) {
 const FacebookStrategy = require('passport-facebook').Strategy;
 const FACEBOOK_OAUTH_CLIENT_ID = process.env.DEV_FACEBOOK_OAUTH_APPID
 const FACEBOOK_OAUTH_CLIENT_SECRET = process.env.DEV_FACEBOOK_OAUTH_APPSECRET
-const FACEBOOK_OAUTH_BACLLBACK_URL = process.env.DEV_FACEBOOK_OAUTH_CALLBACKURL
+const FACEBOOK_OAUTH_CALLBACKURL = process.env.DEV_FACEBOOK_OAUTH_CALLBACKURL
 
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const GOOGLE_OAUTH_CLIENT_ID = process.env.DEV_GOOGLE_OAUTH_CLIENTID
@@ -36,7 +36,7 @@ function(accessToken, refreshToken, profile, done) {
 passport.use(new FacebookStrategy({
   clientID: FACEBOOK_OAUTH_CLIENT_ID,
   clientSecret: FACEBOOK_OAUTH_CLIENT_SECRET,
-  callbackURL: FACEBOOK_OAUTH_BACLLBACK_URL,
+  callbackURL: FACEBOOK_OAUTH_CALLBACKURL,
   profileFields: ['id', 'email', 'gender', 'link', 'locale', 'name', 'timezone', 'updated_time', 'verified'],
 }, function (accessToken, refreshToken, profile, done) {
   return done(null, profile);
@@ -44,7 +44,7 @@ passport.use(new FacebookStrategy({
 ));
 
 // ########### Auth section: PassportJS
-router.get('/loggedin', isLoggedIn, async (req, res) => {
+router.get('/social_loggedin', isLoggedIn, async (req, res) => {
   console.log("req.isAuthenticated()?", req.isAuthenticated())
   
 /**
@@ -83,6 +83,9 @@ router.get('/loggedin', isLoggedIn, async (req, res) => {
  * - DB Query: Does their user account exist? 
  *     Yes: Check PW
  *     No: Let them now that account does not exist
+ * 
+ * ToDo: Add functionality where if its the Social OAuth user's first login, save their login info to db.
+ *
  */
 
   console.log('user data: ', req.user)
@@ -92,17 +95,45 @@ router.get('/loggedin', isLoggedIn, async (req, res) => {
   // If it's not there, register it, then allow them to process to success page.
   var email_received = req.user.emails[0]['value'] 
   var provider_received = req.user.provider
+  // ** Check: Does User Exist?  (Lookup with email)
   const dbReturned_dataObject = await db_fns.forEmail_ReturnUser(email_received);
   // console.log('in ctrl: req.user', req.user)
-  console.log('in ctrl: dbReturned_dataObject: ', dbReturned_dataObject)
-  console.log('in ctrl: provider_received: ', provider_received)
-  console.log('in ctrl: dbReturned_dataObject[0].oauth_provider: ', dbReturned_dataObject[0].oauth_provider)
+  // console.log('in ctrl: dbReturned_dataObject: ', dbReturned_dataObject)
+  // console.log('in ctrl: provider_received: ', provider_received)
+  // console.log('in ctrl: dbReturned_dataObject[0].oauth_provider: ', dbReturned_dataObject[0].oauth_provider)
 
-  // If no data found for that email, 
+  /**
+  Use case:
+  Initial login, user has zero experience with the project.
+  Here, we intend to allow public access with social auth as one step closer to having a user account
+  */
+  /**
+    Upon email lookup, No data was found for this user.
+    -> Use social auth data to create their bare bones user account */
   if (dbReturned_dataObject.length === 0) {
-    // redirect to main page w/ flash msg
-    console.log('I queried email & that user not found.  Please use our default login system, or alternatively, create a google or facebook account you can use to login for convenience')
-    // TODO: Setup flash msg & send this msg above to the user.
+
+    /** If Provider is Email, it's possible the email address is not verified (e.g. its a brand new email address), return them to login with relevant message */
+    if (req.user.provider === 'google' && req.user.emails[0]['verified'] === false ) {
+      console.log('verfified true')
+      req.flash('info', 'It appears your google email address is not yet verified (it is probably a new account). Please verify and try again!')
+      res.render('pages/auth', { flashMessages: req.flash('info') });
+    }
+
+    console.log(req.user)
+    const dataObject_newUserCreation = {
+      providerName_fromProvider: req.user.provider,
+      user_id_fromProvider: req.user.id,
+      user_email_fromProvider: req.user.emails[0].value
+      // We could provide first name & last name, but let's assume we don't need it right now.
+      // user_firstName_fromProvider: req.user.name.givenName,
+      // user_lastName_fromProvider: req.user.name.familyName,
+    }
+    const results_userCreation = await db_fns.createUserAccount_SocialAuth(dataObject_newUserCreation)
+    console.log('results_userCreation', results_userCreation)
+
+    req.flash('info', 'Welcome!')
+      res.render('pages/success', { user: req.user, flashMessages: req.flash('info')});
+
   }
 
   // If you are in the DB, but the social provider you tried isn't the one we have on file.
@@ -132,7 +163,7 @@ router.get('/google',
 router.get('/google/callback', 
   passport.authenticate('google',
   { failureRedirect: '/auth/error',
-    successRedirect: '/auth/loggedin' }),
+    successRedirect: '/auth/social_loggedin' }),
   /* The above is shorthand. Here's another option-- For either (i assume)
     failure or success, we can run a fn.  In the shorthand, we just specify the redirect url
 
@@ -158,7 +189,7 @@ router.get('/facebook',
 
 router.get('/facebook/callback',
   passport.authenticate('facebook', {
-    successRedirect: '/auth/loggedin',
+    successRedirect: '/auth/social_loggedin',
     failureRedirect: '/auth/error'
   })
 );

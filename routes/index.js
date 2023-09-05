@@ -10,7 +10,7 @@ const database = require('knex')(knex_config[environment])
 /* GET home page. */
 router.get('/', function(req, res, next) {
   // res.render('index', { title: 'Express' });
-  res.render('pages/auth');
+  res.render('pages/auth', { flashMessages: ''});
 });
 
 async function selectAllEmployees() {

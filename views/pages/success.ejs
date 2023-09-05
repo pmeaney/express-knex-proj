@@ -21,9 +21,11 @@
       <h1 class="text-primary text-center"><span class="fa fa-user"></span> Profile Information</h1>
       <div class="row">
         <div class="col-sm-6">
+          <% if( flashMessages ) { %>
           <button type="button" class="btn btn-outline-info">
             <%= flashMessages %>
           </button>
+          <% } %>
           <div class="well" style="border:1px solid blue;">
             <% if(user.provider==='google' ){ %>
             <p>
