@@ -20,8 +20,7 @@ exports.up = function(knex) {
     table.string('oauth_provider_user_id')
     table.string('oauth_provider');
     table.string('email');
-    table.string('password');
-    table.string('salt');
+    table.string('argon2_hashed_password');
     table.boolean('isSeedData');
     table.timestamp('created_at').defaultTo(knex.fn.now());
   })

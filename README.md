@@ -1,5 +1,9 @@
 ## Project Info
 
+VS Code Extensions
+- Better Comments
+  - Allows comment colors:
+    - // * <-- Green Comments.  For calling out conditional flow
 
 **A Template User System:** Social Auth + Default Auth.
 
@@ -76,3 +80,47 @@ echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 docker build -t ghcr.io/USERNAME/PACKAGENAME . 
 docker push ghcr.io/USERNAME/PACKAGENAME:latest
 ```
+
+
+### Architecture sections
+
+- Sessions
+  - https://medium.com/swlh/session-management-in-nodejs-using-redis-as-session-store-64186112aa9
+
+- Security
+  - argon2
+    - http://cjlarose.com/2016/03/29/argon2-ffi-express.html
+    - Salt is included in hash automatically: https://github.com/ranisalt/node-argon2/wiki/Options#salt
+    - https://www.npmjs.com/package/argon2
+
+```javascript
+// simple argon2 example from https://github.com/ranisalt/node-argon2#readme
+// run "node" then paste this:
+const argon2 = require('argon2');
+const hash = await argon2.hash("password");
+console.log('hash is: ', hash;)
+await argon2.verify(hash, "password")
+```
+
+```javascript
+// nodejs example in CLI REPL
+❯ node        
+Welcome to Node.js v18.16.1.
+Type ".help" for more information.
+> const argon2 = require('argon2');
+undefined
+> const hash = await argon2.hash("password");
+undefined
+> hash;
+'$argon2id$v=19$m=65536,t=3,p=4$8nDd6IlGzAV+xkYCMuZYGQ$yjxQvSagvZrbs0yy9QAzzoalnQ97tg240VsEv8ZbwyE'
+> await argon2.verify(hash, "password")
+true
+
+```
+
+
+
+Since the Argon2 library generates a salt for us (https://github.com/ranisalt/node-argon2/wiki/Options#salt) Do we need to still extract its salt and store it in the DB?
+
+Well, as it turns out, Argon2's hash function output includes the salt within it already.  So by storing the hash, since it already includes a salt value by default (default is 16 chars), the salt is stored as well.  More info here in the "Storing Passwords" section:
+https://www.alexedwards.net/blog/how-to-hash-and-verify-passwords-with-argon2-in-go

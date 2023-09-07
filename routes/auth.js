@@ -9,6 +9,32 @@ const process = require('../config-server-env.js')
 // ###### My Fn library
 const db_fns = require('../lib/db_fns.js')
 
+
+/** Local Signup process
+  Allows user to create a bare bones profile similar to the "on first login" of Social Login
+  From there, they can add profile info or go to interacting w/ app   */
+router.post('/local_signup', auth_ctrl.LocalAuth_CreateUserAccount);
+router.post('/local_login', auth_ctrl.LocalAuth_LogIn);
+
+/** Social Login
+  If user has social provider, they can use it to login.
+  On first login, it creates their account and forwards them to a page with a profile widget
+  where they can add additional user info if they choose, or go straight to interacting with the app. */
+router.get('/social_loggedin', isLoggedIn, auth_ctrl.SocialAuth_LogIn);
+
+// This is '/auth/error' which is used by Social OAuth2 as the error callback URL.
+// Need to add an error page here. (note: Also need to add a general 404 page for un-found routes)
+router.get('/error', (req, res) => res.send("error logging in"));
+
+// This is a PassportJS convention.  isAuthenticated fn is part of PassportJS.
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated())
+    // if user is authenticated, run "next" fn (i.e. proceed to req/res fn)
+    return next();
+  // otherwise, direct to main page.
+  res.redirect('/');
+}
+
 // ####### PassportJS Configs
 const passport = require('passport');
 passport.serializeUser(function(user, cb) {
@@ -35,18 +61,13 @@ passport.use(new FacebookStrategy({
   clientSecret: process.env.DEV_FACEBOOK_OAUTH_APPSECRET,
   callbackURL: process.env.DEV_FACEBOOK_OAUTH_CALLBACKURL,
   profileFields: ['id', 'email', 'gender', 'link', 'locale', 'name', 'timezone', 'updated_time', 'verified'],
-}, function (accessToken, refreshToken, profile, done) {
-  return done(null, profile);
-}
+  }, 
+  function (accessToken, refreshToken, profile, done) {
+    return done(null, profile);
+  }
 ));
 
-// ########### Auth section: PassportJS
-router.get('/social_loggedin', isLoggedIn, auth_ctrl.LoginProcess_SocialAuth );
-
-router.get('/error', (req, res) => res.send("error logging in"));
- 
 // ########### PassportJS Google Auth 
-
 router.get('/google', 
   passport.authenticate('google', { scope : ['profile', 'email'] }));
  
@@ -83,18 +104,6 @@ router.get('/facebook/callback',
     failureRedirect: '/auth/error'
   })
 );
-
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated())
-    // if user is authenticated, run "next" fn (i.e. proceed to req/res fn)
-    return next();
-  // otherwise, direct to main page.
-  res.redirect('/');
-}
-
-// Posted from Default Signup Form.  Email & Password
-router.post('/local_signup', auth_ctrl.LoginProcess_LocalAuth);
-
 
 module.exports = router;
 

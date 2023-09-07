@@ -9,3 +9,22 @@ content-type: application/json
 {
     "email": "blah@test.com"
 }
+
+###
+POST http://localhost:3000/auth/local_signup
+content-type: application/json
+
+{
+    "email": "patrick.wm.meaney@gmail.com",
+    "password": "password123"
+}
+
+
+###
+POST http://localhost:3000/auth/local_login
+content-type: application/json
+
+{
+    "email": "patrick.wm.meaney@gmail.com",
+    "password": "password123"
+}

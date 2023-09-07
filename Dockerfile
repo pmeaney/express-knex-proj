@@ -8,6 +8,9 @@ COPY ./package*.json .
 
 RUN npm install
 
+# https://github.com/kelektiv/node.bcrypt.js/issues/824
+# RUN npm cache clean --force && rm -rf node_modules && npm install
+
 COPY . .
 
 EXPOSE 3000
