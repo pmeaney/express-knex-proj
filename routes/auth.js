@@ -6,17 +6,13 @@ const auth_ctrl = require('../routeControllers/auth_ctrl')
 const process = require('../config-server-env.js')
 // ####### Knex Configs
 
-// ###### My Fn library
-const db_fns = require('../lib/db_fns.js')
-
-
-/** Local Signup process
+/** Local Signup & Login process
   Allows user to create a bare bones profile similar to the "on first login" of Social Login
   From there, they can add profile info or go to interacting w/ app   */
 router.post('/local_signup', auth_ctrl.LocalAuth_CreateUserAccount);
 router.post('/local_login', auth_ctrl.LocalAuth_LogIn);
 
-/** Social Login
+/** Social Login process
   If user has social provider, they can use it to login.
   On first login, it creates their account and forwards them to a page with a profile widget
   where they can add additional user info if they choose, or go straight to interacting with the app. */

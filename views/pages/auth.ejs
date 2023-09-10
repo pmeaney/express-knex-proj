@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Google SignIn</title>
+    <title>Sign Up or Sign In</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"> <!-- load bulma css -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> <!-- load fontawesome -->
     <style>
@@ -20,6 +20,35 @@
         <br />
         <br />
         <a href="/auth/facebook" class="btn btn-info"><span class="fa fa-facebook"></span> SignIn with Facebook</a>
+        <br />
+        <br />
+        <form action="/auth/local_signup" method="post">
+            <h2>Sign up</h2>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email address</label>
+              <input name="email" type="email" class="form-control">
+            </div>
+            <div class="mb-3">
+                <p>(Note: normally we would have a 2nd password box for verification)</p>
+              <label for="password" class="form-label">Password</label>
+              <input name="password" type="password" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+          <br>
+          <br>
+          <form action="/auth/local_login" method="post">
+            <h2>Log In</h2>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email address</label>
+              <input name="email" type="email" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input name="password" type="password" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
     </div>
 </div>
 </body>

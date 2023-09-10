@@ -105,6 +105,15 @@ const SocialAuth_LogIn = async (req, res) => {
   }
 }
 
+// ########## LOCAL AUTH SECTION
+
+
+  /**
+  // * THIS IS THE SIGN UP PROCESS
+  // * Check if User Account already exists.
+  // * Yes, user already exists: Do not allow sign up.  Notify user that the account already exists and to try a different one..
+  // * No, user does not yet exist: allow account creation
+  */
 const LocalAuth_CreateUserAccount = async (req, res) => {
 
   /**
@@ -116,11 +125,6 @@ const LocalAuth_CreateUserAccount = async (req, res) => {
   var password_received = req.body.password
   const dbReturned_dataObject = await db_fns.forEmail_ReturnUser(email_received);
 
-  /**
-  // * Check if User Account already exists.
-  // * Yes, user already exists: Do not allow sign up.  Notify user that the account already exists and to try a different one..
-  // * No, user does not yet exist: Allow user to create user account.
-  */
   // If user is in the DB, reject the signup
   if (dbReturned_dataObject.length === 1) {
     req.flash('info', 'A user with that email address already exists.  Please try a different email address.')
@@ -129,7 +133,7 @@ const LocalAuth_CreateUserAccount = async (req, res) => {
 
   // If no data found for that email, allow Create user account
   if (dbReturned_dataObject.length === 0) {
-    console.log('I queried users table for that email & no user was not found. I will create a user account for that user.')
+    console.log('I queried users table for that email & no user was not found.')
 
     // Allow Create user account
     try {
@@ -141,8 +145,13 @@ const LocalAuth_CreateUserAccount = async (req, res) => {
       // store pw & other info in db
       const results_fromDB = await db_fns.createUserAccount_LocalAuth(dataObject_forDB);
       console.log('results_fromDB (db_fns.createUserAccount_LocalAuth) -- ', results_fromDB)
+      console.log('[[ allow login.  Todo: redirect to success page w/ relevant user data ]]')
       // redirect user to success page
-
+      // need to decide what info to send to frontend.
+      // for example, need to delete the hashed password from the object
+      var userDataObject_sentToUX = results_fromDB[0]
+      req.flash('info', 'Welcome!')
+      res.render('pages/success', { user: userDataObject_sentToUX, flashMessages: req.flash('info') });
 
     } catch (err) {
       console.log('[error]: ', err)
@@ -154,24 +163,40 @@ const LocalAuth_CreateUserAccount = async (req, res) => {
 const LocalAuth_LogIn = async (req, res) => {
   var email_received = req.body.email
   var password_received = req.body.password
-  const dbReturned_dataObject = await db_fns.forEmail_ReturnHashedPassword(email_received);
+  const dbReturned_dataObject = await db_fns.forEmail_ReturnUser(email_received);
 
   /**
   // * Check if User Account already exists.
   // * No, user does not yet exist: Disallow login
-  // * Yes, user already exists: Allow login
+  // * Yes, user already exists:
+  // *    Is provider local_auth?
+  // *    No: Redirect to login page with info: "please login with your original auth provider (social auth)" Allow login
+  // *
   */
-  // console.log('[auth_ctrl.LocalAuth_LogIn]: dbReturned_dataObject --', dbReturned_dataObject)
+  console.log('[auth_ctrl.LocalAuth_LogIn]: dbReturned_dataObject --', dbReturned_dataObject)
 
   // If no data found for that email, disallow login
+  // "No, user does not yet exist: Disallow login"
   if (dbReturned_dataObject.length === 0) {
     console.log('I queried users table for that email & no user was not found. I will create a user account for that user.')
-
+    // If user is in the DB, and password does not match, disallow login
+    req.flash('info', 'Unable to log you in, no user found for that login info.  Please sign up first.')
+    res.render('pages/auth', { flashMessages: req.flash('info') });
   }
 
   // If user is in the DB, Check password
+  // "Yes, user already exists:"
   if (dbReturned_dataObject.length === 1) {
-    console.log('User exists, checking pw...')
+  
+    // Access oauth_provider field.  Should be facebook, google, or local_auth
+    const localLoginAttempt_oAuthProvider = dbReturned_dataObject[0]['oauth_provider']
+    console.log('[localLoginAttempt_oAuthProvider]: check provider ', localLoginAttempt_oAuthProvider)
+
+    if (localLoginAttempt_oAuthProvider !== 'local_auth') {
+      req.flash('info', `Your account in our app was created via the Social Authentication login for: ${localLoginAttempt_oAuthProvider}.  Please use that method to login. If you're having login problems, please contact us.`)
+      res.render('pages/auth', { flashMessages: req.flash('info') });
+    }
+
     const password_check_result = await argon2.verify(dbReturned_dataObject[0]['argon2_hashed_password'], password_received);
     console.log('[password_check_result]: Password passed in is --', password_check_result)
     if (password_check_result === false) {
@@ -182,6 +207,15 @@ const LocalAuth_LogIn = async (req, res) => {
 
     if (password_check_result === true) {
       // If user is in the DB, and password matches, allow login.
+      console.log('Password is correct. Redirect to login page.')
+      var userDataObject_sentToUX = dbReturned_dataObject[0]
+      console.log('userDataObject_sentToUX', userDataObject_sentToUX)
+      delete userDataObject_sentToUX['argon2_hashed_password']
+      delete userDataObject_sentToUX['isSeedData']
+      delete userDataObject_sentToUX['created_at']
+      req.flash('info', 'Welcome!')
+      res.render('pages/success', { user: userDataObject_sentToUX, flashMessages: req.flash('info') });
+
     }
   }
 }
