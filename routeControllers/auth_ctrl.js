@@ -2,58 +2,51 @@ const argon2 = require('argon2');
 
 const db_fns = require('../lib/db_fns.js')
 
+/**
+* OAuth Social Login Process, 
+   * - DB Query: Does their user account exist? 
+*  Yes: 
+*     - Does the user account have a provider which is the same as the one they just used?
+*        No: 
+*          - is it the default login? Tell them to use default login process
+*          - is it other social oauth provider? Tell them "Sorry, please use your original social auth to login: {Provider name}"
+*        Yes, Matching account: Ok, let them log in.
+*  No: Create a new User data table row for them.  social oauth data (id, provider) & email
+*      Then, return that data object we just upserted for them.
+*      Then, allow them to log in.
+* OAuth is meant to be passwordless "Social login is a passwordless login option governed by the Open Authorization (OAuth 2.0) and OpenID Connect (OIDC) standards"
+* So, no need to worry about password in this case.
+* 
+* Local Sign Up process
+* 
+*  Validate both.
+*  Then, Run checks:
+*  - Q: Does the attempted sign up process's user already exist?
+*       DB Query -- Return the user object.
+   *    Yes: Tell user that email address is unavailable and that they previously created it with "Provider"
+*    No:  Salt & hash pw.  Save email, pw & salt in DB.  
+*    Then redirect the user to login page.
+* 
+* Next, Default Login process.
+* - DB Query: Does their user account exist? 
+*     No: Deny access & redirect to login page. Let them know that account does not exist
+*    Yes: 
+*      - Is the provider local_auth?
+No: Deny access & redirect to login page. Ask them to use original social auth provider.
+Yes: Check PW.
+- Does password match the one in our DB?
+No: deny access.
+Yes: Allow them to login
+*/
+
 const SocialAuth_LogIn = async (req, res) => {
   console.log("req.isAuthenticated()?", req.isAuthenticated())
-
-  /**
-   * OAuth Social Login Process, 
-   * - DB Query: Does their user account exist? 
-   *  Yes: if so, return its info.  
-   *     - Does the user account have a provider which is the same as the one they just used?
-   *        Yes, Matching account: Ok, let them log in.
-   *        No: 
-   *          - is it the default login? Tell them to use default login process
-   *          - is it other social oauth provider? Tell them "Sorry, please use your original social auth to login: {Provider name}"
-   *  No: Create a new User data table row for them.  social oauth data (id, provider) & email
-   *      Then, return that data object we just upserted for them.
-   *      Then, allow them to log in.
-   * OAuth is meant to be passwordless "Social login is a passwordless login option governed by the Open Authorization (OAuth 2.0) and OpenID Connect (OIDC) standards"
-   * So, no need to worry about password in this case.
-   * 
-   * Next, need to create Default Sign Up process
-   * - No HTML form, just the http test (same as postman) & nodejs test in __test__ directory
-   * So, deliverable is: REST API endpoint
-   * 
-   * Pretend Html Form: Sign up! [ Email address ]  [ Password ] [ Password-2-Check ]
-   *    We assume that a dev's frontned would use a "Validate passwords match" functionality in UX
-   *    So, we assume REST API just receives:
-   * 
-   *    Email, Password
-   *  Validate both.
-   *  Then, Run checks:
-   *  - Q: Does the attempted sign up process's user already exist?
-  *       DB Query -- Return the user object.
-   *    Yes: Tell user that email address is unavailable and that they previously created it with "Provider"
-   *    No:  Salt & hash pw.  Save email, pw & salt in DB.  
-   *    Then redirect the user to login page.
-   * 
-   * Next, Default Login process.
-   * - DB Query: Does their user account exist? 
-   *     Yes: Check PW
-   *     No: Let them now that account does not exist
-   * 
-   * ToDo: Add functionality where if its the Social OAuth user's first login, save their login info to db.
-   *
-   */
-
-  console.log('user data: ', req.user)
-
-  /**
-  Use case:
-  Initial login, user has zero experience with the project.
-  Here, we intend to allow public access with social auth as one step closer to having a user account
-  // * Check: Does User Exist in DB?  (Lookup with email)
-  // * No, User Does Not Exist: Register them &  proceed to success page     */
+/**
+Use case:
+Initial login, user has zero experience with the project.
+Here, we intend to allow public access with social auth as one step closer to having a user account
+// * Check: Does User Exist in DB?  (Lookup with email)
+// * No, User Does Not Exist: Register them &  proceed to success page     */
   // * Yes, But-- Provider doesn't match: Redirect with message to login with original provider
   // * Yes, the social auth provider requested vs. one in the db match.  Allow to proceed
   var email_received = req.user.emails[0]['value']
@@ -106,10 +99,8 @@ const SocialAuth_LogIn = async (req, res) => {
 }
 
 // ########## LOCAL AUTH SECTION
-
-
   /**
-  // * THIS IS THE SIGN UP PROCESS
+  // * LOCAL AUTH SIGN UP PROCESS
   // * Check if User Account already exists.
   // * Yes, user already exists: Do not allow sign up.  Notify user that the account already exists and to try a different one..
   // * No, user does not yet exist: allow account creation
@@ -117,9 +108,11 @@ const SocialAuth_LogIn = async (req, res) => {
 const LocalAuth_CreateUserAccount = async (req, res) => {
 
   /**
-    // Todo:
+    // ! NOTE: This project is intended to be a 
+    // ! relatively bare-bones REST API template
+    // ! Therefore, we are not doing password validation, to keep it smiple.
+    // (In this project, we'll assume we did frontend PW verification)
     // Frontend validation for: Password (check 2 inputs), Email format
-    // (On the backend we'll assume we did verification)
   */
   var email_received = req.body.email
   var password_received = req.body.password
@@ -147,9 +140,8 @@ const LocalAuth_CreateUserAccount = async (req, res) => {
       console.log('results_fromDB (db_fns.createUserAccount_LocalAuth) -- ', results_fromDB)
       console.log('[[ allow login.  Todo: redirect to success page w/ relevant user data ]]')
       // redirect user to success page
-      // need to decide what info to send to frontend.
-      // for example, need to delete the hashed password from the object
       var userDataObject_sentToUX = results_fromDB[0]
+      console.log('[LocalAuth_CreateUserAccount]: userDataObject_sentToUX')
       req.flash('info', 'Welcome!')
       res.render('pages/success', { user: userDataObject_sentToUX, flashMessages: req.flash('info') });
 
@@ -210,6 +202,7 @@ const LocalAuth_LogIn = async (req, res) => {
       console.log('Password is correct. Redirect to login page.')
       var userDataObject_sentToUX = dbReturned_dataObject[0]
       console.log('userDataObject_sentToUX', userDataObject_sentToUX)
+      // delete the key/value pairs we don't want to send to UX
       delete userDataObject_sentToUX['argon2_hashed_password']
       delete userDataObject_sentToUX['isSeedData']
       delete userDataObject_sentToUX['created_at']

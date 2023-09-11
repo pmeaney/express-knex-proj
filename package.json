@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www",
-    "test": "NODE_ENV=test jest --watch"
+    "test": "NODE_ENV=test jest --watchAll"
   },
   "dependencies": {
     "argon2": "^0.31.1",

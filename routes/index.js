@@ -25,7 +25,6 @@ router.get("/api/v1/employees", async (req, res) => {
     console.log('dataObject', dataObject)
     res.status(200).json(dataObject)
   } catch (err) {
-    // console.log('res', res)
     console.log('err', err)
     res.status(500).json({message: "Error getting data"})
   }
