@@ -7,10 +7,17 @@ const environment = process.env.NODE_ENV
 const knex_config = require('../knexfile')
 const database = require('knex')(knex_config[environment])
 
+
+/** UX experimenting */
+router.get('/ux1', function(req, res, next) {
+  res.render('uxPagesExperiments/ux_JustNewsFeed');
+});
+
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   // res.render('index', { title: 'Express' });
-  res.render('pages/auth', { flashMessages: ''});
+  res.render('authPages/auth', { flashMessages: ''});
 });
 
 async function selectAllEmployees() {

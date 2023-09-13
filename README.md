@@ -9,7 +9,12 @@ VS Code Extensions
 
 The project will initally be just a user mgmt template, useful for building apps in general. 
 
+### Styles
 
+- https://sass-lang.com/guide/
+
+`npm install -g sass`
+`sass --watch ./sass/bulma-sass/bulma.scss ./public/stylesheets/sass-compiled-style/compiled-styles.css`
 
 ### Swagger stuff:
 https://dev.to/przpiw/document-express-api-with-swagger-51in

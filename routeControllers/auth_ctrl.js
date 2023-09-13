@@ -63,7 +63,7 @@ Here, we intend to allow public access with social auth as one step closer to ha
     if (req.user.provider === 'google' && req.user.emails[0]['verified'] === false) {
       console.log('verfified true')
       req.flash('info', 'It appears your google email address is not yet verified (it is probably a new account). Please go through google\'s email verification process and try again!')
-      res.render('pages/auth', { flashMessages: req.flash('info') });
+      res.render('authPages/auth', { flashMessages: req.flash('info') });
     }
 
     const dataObject_newUserCreation = {
@@ -78,7 +78,7 @@ Here, we intend to allow public access with social auth as one step closer to ha
     console.log('results_userCreation', results_userCreation)
 
     req.flash('info', 'Welcome!')
-    res.render('pages/success', { user: req.user, flashMessages: req.flash('info') });
+    res.render('authPages/success', { user: req.user, flashMessages: req.flash('info') });
   }
 
   // If you are in the DB, but the social provider you tried isn't the one we have on file.
@@ -86,7 +86,7 @@ Here, we intend to allow public access with social auth as one step closer to ha
     // redirect to main login page w/ flash msg
     // console.log(`Social provider login provider tried: ${provider_received}.  Original social login provider: ${dbReturned_dataObject[0].oauth_provider}`)
     req.flash('info', `It appears you originally logged in via ${dbReturned_dataObject[0].oauth_provider}-- please use that same authentication provider. Or if you need to change providers, please contact us. Thanks!`)
-    res.render('pages/auth', { flashMessages: req.flash('info') });
+    res.render('authPages/auth', { flashMessages: req.flash('info') });
   }
 
   // If you are in the DB, and the social provider you tried is the one we have on file: Proceed to successful login page.
@@ -94,7 +94,7 @@ Here, we intend to allow public access with social auth as one step closer to ha
     // redirect to main page w/ flash msg
     console.log(`Social provider login provider tried: ${provider_received}.  Original social login provider: ${dbReturned_dataObject[0].oauth_provider}`)
     req.flash('info', 'Welcome!')
-    res.render('pages/success', { user: req.user, flashMessages: req.flash('info') });
+    res.render('authPages/success', { user: req.user, flashMessages: req.flash('info') });
   }
 }
 
@@ -121,7 +121,7 @@ const LocalAuth_CreateUserAccount = async (req, res) => {
   // If user is in the DB, reject the signup
   if (dbReturned_dataObject.length === 1) {
     req.flash('info', 'A user with that email address already exists.  Please try a different email address.')
-    res.render('pages/auth', { flashMessages: req.flash('info') });
+    res.render('authPages/auth', { flashMessages: req.flash('info') });
   }
 
   // If no data found for that email, allow Create user account
@@ -143,7 +143,7 @@ const LocalAuth_CreateUserAccount = async (req, res) => {
       var userDataObject_sentToUX = results_fromDB[0]
       console.log('[LocalAuth_CreateUserAccount]: userDataObject_sentToUX')
       req.flash('info', 'Welcome!')
-      res.render('pages/success', { user: userDataObject_sentToUX, flashMessages: req.flash('info') });
+      res.render('authPages/success', { user: userDataObject_sentToUX, flashMessages: req.flash('info') });
 
     } catch (err) {
       console.log('[error]: ', err)
@@ -173,7 +173,7 @@ const LocalAuth_LogIn = async (req, res) => {
     console.log('I queried users table for that email & no user was not found. I will create a user account for that user.')
     // If user is in the DB, and password does not match, disallow login
     req.flash('info', 'Unable to log you in, no user found for that login info.  Please sign up first.')
-    res.render('pages/auth', { flashMessages: req.flash('info') });
+    res.render('authPages/auth', { flashMessages: req.flash('info') });
   }
 
   // If user is in the DB, Check password
@@ -186,7 +186,7 @@ const LocalAuth_LogIn = async (req, res) => {
 
     if (localLoginAttempt_oAuthProvider !== 'local_auth') {
       req.flash('info', `Your account in our app was created via the Social Authentication login for: ${localLoginAttempt_oAuthProvider}.  Please use that method to login. If you're having login problems, please contact us.`)
-      res.render('pages/auth', { flashMessages: req.flash('info') });
+      res.render('authPages/auth', { flashMessages: req.flash('info') });
     }
 
     const password_check_result = await argon2.verify(dbReturned_dataObject[0]['argon2_hashed_password'], password_received);
@@ -194,7 +194,7 @@ const LocalAuth_LogIn = async (req, res) => {
     if (password_check_result === false) {
       // If user is in the DB, and password does not match, disallow login
       req.flash('info', 'Your password does not appear to be correct.')
-      res.render('pages/auth', { flashMessages: req.flash('info') });
+      res.render('authPages/auth', { flashMessages: req.flash('info') });
     }
 
     if (password_check_result === true) {
@@ -207,7 +207,7 @@ const LocalAuth_LogIn = async (req, res) => {
       delete userDataObject_sentToUX['isSeedData']
       delete userDataObject_sentToUX['created_at']
       req.flash('info', 'Welcome!')
-      res.render('pages/success', { user: userDataObject_sentToUX, flashMessages: req.flash('info') });
+      res.render('authPages/success', { user: userDataObject_sentToUX, flashMessages: req.flash('info') });
 
     }
   }

@@ -64,7 +64,7 @@ passport.use(new FacebookStrategy({
 ));
 
 // ########### PassportJS Google Auth 
-router.get('/google', 
+router.get('/google',
   passport.authenticate('google', { scope : ['profile', 'email'] }));
  
 router.get('/google/callback', 
